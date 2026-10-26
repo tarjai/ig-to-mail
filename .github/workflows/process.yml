@@ -1,0 +1,64 @@
+name: process
+
+on:
+  # iOS Shortcut -> POST /repos/{owner}/{repo}/dispatches  {"event_type": "carousel"|"video", "client_payload": {"url": "..."}}
+  repository_dispatch:
+    types: [carousel, video]
+  # Actions sekmesinden manuel test
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        options: [carousel, video, health]
+        default: carousel
+      url:
+        description: Instagram post / reel linki
+        required: false
+  # Haftalık cookie sağlık kontrolü
+  schedule:
+    - cron: "23 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MODE: ${{ github.event.action || inputs.mode || 'health' }}
+      POST_URL: ${{ github.event.client_payload.url || inputs.url }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      GROQ_VISION_MODEL: ${{ vars.GROQ_VISION_MODEL }}
+      GROQ_TEXT_MODEL: ${{ vars.GROQ_TEXT_MODEL }}
+      GROQ_WHISPER_MODEL: ${{ vars.GROQ_WHISPER_MODEL }}
+      IG_SESSIONID: ${{ secrets.IG_SESSIONID }}
+      IG_CSRFTOKEN: ${{ secrets.IG_CSRFTOKEN }}
+      IG_DS_USER_ID: ${{ secrets.IG_DS_USER_ID }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      MAIL_TO: ${{ secrets.MAIL_TO }}
+      HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: System packages
+        run: |
+          pkgs="ffmpeg"
+          if [ "$MODE" = "carousel" ]; then pkgs="$pkgs tesseract-ocr tesseract-ocr-tur tesseract-ocr-eng"; fi
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends $pkgs
+
+      - name: Python packages
+        # gallery-dl her çalışmada güncellenir: Instagram değişikliklerine karşı en güncel extractor
+        run: |
+          pip install -q -r requirements.txt
+          pip install -q -U gallery-dl
+
+      - name: Run
+        run: python -m igmail "$MODE" "$POST_URL"

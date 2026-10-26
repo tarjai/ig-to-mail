@@ -1,0 +1,4 @@
+gallery-dl>=1.32
+Pillow>=11,<14
+pytesseract>=0.3.13,<0.4
+groq>=1.0,<2
