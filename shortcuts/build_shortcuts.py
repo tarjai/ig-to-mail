@@ -21,6 +21,11 @@ SHORTCUTS = [
     {"name": "IG Video to Mail", "event": "video", "color": 3679049983, "glyph": 59733},  # purple, filmstrip
 ]
 
+INPUT_CLASSES = [
+    "WFURLContentItem", "WFStringContentItem", "WFRichTextContentItem", "WFSafariWebPageContentItem",
+    "WFArticleContentItem", "WFGenericFileContentItem", "WFImageContentItem", "WFAVAssetContentItem",
+]
+
 OBJ = "￼"  # Shortcuts metin içindeki değişken yer tutucusu
 
 
@@ -100,7 +105,9 @@ def build(event: str, color: int, glyph: int) -> dict:
         "WFWorkflowMinimumClientVersionString": "900",
         "WFWorkflowIcon": {"WFWorkflowIconStartColor": color, "WFWorkflowIconGlyphNumber": glyph},
         "WFWorkflowTypes": ["ActionExtension"],
-        "WFWorkflowInputContentItemClasses": ["WFURLContentItem", "WFStringContentItem"],
+        # Uygulamalar paylaşımı farklı tiplerle yapabiliyor (Instagram: URL, web sayfası, zengin metin);
+        # listede olmayan tip iOS tarafından süzülür ve girdi boş gelir. Linki backend ayıklar.
+        "WFWorkflowInputContentItemClasses": INPUT_CLASSES,
         "WFWorkflowOutputContentItemClasses": [],
         "WFWorkflowHasShortcutInputVariables": True,
         "WFWorkflowNoInputBehavior": {"Name": "WFWorkflowNoInputBehaviorGetClipboard", "Parameters": {}},
