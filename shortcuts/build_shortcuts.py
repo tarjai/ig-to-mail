@@ -63,13 +63,12 @@ def action(identifier: str, **params) -> dict:
 
 
 def build(event: str, color: int, glyph: int) -> dict:
-    token_id, urls_id, item_id, req_id = (str(uuid.uuid4()).upper() for _ in range(4))
+    token_id, input_id, req_id = (str(uuid.uuid4()).upper() for _ in range(3))
     actions = [
         # 0: token — kısayol eklenirken import question ile doldurulur
         action("gettext", UUID=token_id, WFTextActionText="GITHUB_TOKEN"),
-        action("detect.link", UUID=urls_id, WFInput=attachment({"Type": "ExtensionInput"})),
-        action("getitemfromlist", UUID=item_id, WFItemSpecifier="First Item",
-               WFInput=attachment(output(urls_id, "URLs"))),
+        # Girdi (paylaşılan URL/metin ya da pano) olduğu gibi metne çevrilir; linki backend ayıklar
+        action("gettext", UUID=input_id, WFTextActionText=text_with_var("", {"Type": "ExtensionInput"})),
         action(
             "downloadurl",
             UUID=req_id,
@@ -84,7 +83,7 @@ def build(event: str, color: int, glyph: int) -> dict:
             WFJSONValues=dict_items([
                 text_item("event_type", text(event)),
                 dict_item("client_payload", [
-                    text_item("url", text_with_var("", output(item_id, "Item from List"))),
+                    text_item("url", text_with_var("", output(input_id, "Text"))),
                 ]),
             ]),
         ),

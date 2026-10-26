@@ -60,5 +60,14 @@ jobs:
           pip install -q -r requirements.txt
           pip install -q -U gallery-dl
 
+      - name: Check config
+        # Secret değerleri loglanmaz; sadece tanımlı olup olmadıkları
+        run: |
+          echo "mode=$MODE url=$POST_URL"
+          if [ "$GITHUB_EVENT_NAME" = "repository_dispatch" ]; then jq -c '.client_payload' "$GITHUB_EVENT_PATH"; fi
+          for n in GROQ_API_KEY IG_SESSIONID GMAIL_USER GMAIL_APP_PASSWORD; do
+            if [ -n "${!n}" ]; then echo "OK      $n"; else echo "::error::Secret eksik: $n"; fi
+          done
+
       - name: Run
         run: python -m igmail "$MODE" "$POST_URL"

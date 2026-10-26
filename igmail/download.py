@@ -56,6 +56,8 @@ def _resolve_share_link(url: str) -> str:
 
 def normalize_url(raw: str) -> tuple[str, str]:
     """Shortcut'tan gelen metin/URL'den kanonik post URL'si ve shortcode döndürür."""
+    if not raw.strip():
+        raise DownloadError("Link boş geldi. Kısayolu Instagram paylaş menüsünden çalıştır ya da linki panoya kopyala.")
     m = URL_RE.search(raw.strip())
     if not m:
         raise DownloadError(f"Geçerli bir URL bulunamadı: {raw!r}")
@@ -99,9 +101,9 @@ def _media_files(outdir: Path) -> list[Path]:
 
 
 def download(raw_url: str, workdir: Path, attempts: int = 3) -> Post:
+    url, code = normalize_url(raw_url)
     if not config.IG_SESSIONID:
         raise CookieError("IG_SESSIONID secret'ı tanımlı değil")
-    url, code = normalize_url(raw_url)
     outdir = workdir / code
     outdir.mkdir(parents=True, exist_ok=True)
     cfg = workdir / "gallery-dl.json"
