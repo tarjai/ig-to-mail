@@ -1,5 +1,17 @@
 # iOS Shortcut kurulumu
 
+## Hazır dosya ile (önerilen)
+1. iPhone'a `IG Carousel to Mail.shortcut` ve `IG Video to Mail.shortcut` dosyalarını indir (Dosyalar uygulamasına kaydet).
+2. Dosyaya dokun → Kısayollar açılır → **Kısayol Ekle**.
+3. Token sorulduğunda GitHub fine-grained token'ı yapıştır. Token dosyada yok, sadece senin cihazında saklanır.
+4. Kullanım: Instagram → Paylaş → **IG Carousel to Mail** / **IG Video to Mail**. Girdi olmadan çalıştırılırsa linki panodan alır.
+
+Bildirimde "İşleme alındı" dışında bir metin (`Bad credentials`, `Not Found` vb.) görünürse istek GitHub'a ulaşmamıştır: token'ı kontrol et.
+
+Dosyaları yeniden üretmek için: `python shortcuts/build_shortcuts.py` (imzasız çıktı verir, docstring'deki gibi imzalanır).
+
+## Elle kurulum
+
 İki kısayol aynı yapıda; sadece `event_type` farklı (`carousel` / `video`).
 `<TOKEN>` = fine-grained token.
 
